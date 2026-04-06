@@ -12,6 +12,7 @@ An AI-powered web app that analyzes and validates your startup ideas. Get instan
 - **Risk & Profitability Score** — Instant risk level (Low / Medium / High) and a profitability score out of 100
 - **Dashboard** — View and manage all your previously submitted ideas
 - **Persistent Storage** — All ideas saved to Supabase database
+- **PDF Export** — Download a clean, formatted PDF report of any startup idea
 
 ---
 
@@ -25,6 +26,7 @@ An AI-powered web app that analyzes and validates your startup ideas. Get instan
 | AI Model | Groq — Llama 3.3 70B Versatile |
 | Database | Supabase (PostgreSQL) |
 | Fonts | Inter (Google Fonts) |
+| PDF Generation | jsPDF |
 
 ---
 
