@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2, Sparkles } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
@@ -76,9 +77,19 @@ export default function Home() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition"
+          className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2"
         >
-          {loading ? '⏳ Analyzing your idea...' : '✨ Validate My Idea'}
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Analyzing your idea...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              Validate My Idea
+            </>
+          )}
         </button>
 
         {loading && (
