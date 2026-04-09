@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Rocket, LayoutDashboard } from 'lucide-react'
 import './globals.css'
+import NavbarAuth from '@/components/NavbarAuth'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,10 +25,13 @@ export default function RootLayout({
               <Rocket className="w-5 h-5" />
               StartupValidator
             </a>
-            <a href="/ideas" className="text-sm text-gray-400 hover:text-white transition flex items-center gap-1">
-              <LayoutDashboard className="w-4 h-4" />
-              Dashboard
-            </a>
+            <div className="flex items-center gap-4">
+              <a href="/ideas" className="text-sm text-gray-400 hover:text-white transition flex items-center gap-1">
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
+              </a>
+              <NavbarAuth />  {/* 👈 login/logout button */}
+            </div>
           </div>
         </nav>
         <main className="max-w-5xl mx-auto px-6 py-10">

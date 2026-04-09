@@ -1,12 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Groq from 'groq-sdk'                    // ← changed
-import { supabase } from '@/lib/supabase'
+import Groq from 'groq-sdk'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 const client = new Groq({
-  apiKey: process.env.GROQ_API_KEY!            // ← changed
+  apiKey: process.env.GROQ_API_KEY!
 })
 
+// Helper to create a server-side Supabase client
+function createClient() {
+  const cookieStore = cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+}
+
 export async function GET() {
+  const supabase = createClient()
+
+  // Get logged in user
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not logged in' }, { status: 401 })
+
   const { data, error } = await supabase
     .from('ideas')
     .select('id, title, description, risk_level, profitability_score, created_at')
@@ -17,6 +43,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = createClient()
+
+  // Get logged in user
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not logged in' }, { status: 401 })
+
   const { title, description } = await req.json()
 
   if (!title || !description) {
@@ -34,13 +66,13 @@ Return ONLY JSON, no markdown, no backticks.
 
 Input: ${JSON.stringify({ title, description })}`
 
-  const message = await client.chat.completions.create({   // ← changed
-    model: 'llama-3.3-70b-versatile',                      // ← changed
+  const message = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }]
   })
 
-  const rawText = message.choices[0].message.content ?? '' // ← changed
+  const rawText = message.choices[0].message.content ?? ''
   const analysis = JSON.parse(rawText)
 
   const { data, error } = await supabase
@@ -55,7 +87,8 @@ Input: ${JSON.stringify({ title, description })}`
       tech_stack: analysis.tech_stack,
       risk_level: analysis.risk_level,
       profitability_score: analysis.profitability_score,
-      justification: analysis.justification
+      justification: analysis.justification,
+      user_id: user.id  // 👈 this is the key addition
     }])
     .select()
     .single()
