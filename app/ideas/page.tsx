@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Loader2, Plus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 interface Idea {
   id: string
@@ -13,16 +15,26 @@ interface Idea {
 }
 
 export default function IdeasPage() {
+  const router = useRouter()
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/ideas')
-      .then(res => res.json())
-      .then(data => {
-        setIdeas(data)
-        setLoading(false)
-      })
+    // 👇 Check if logged in first
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) {
+        router.push('/auth')
+        return
+      }
+
+      // Only fetch ideas if logged in
+      fetch('/api/ideas')
+        .then(res => res.json())
+        .then(data => {
+          setIdeas(Array.isArray(data) ? data : [])
+          setLoading(false)
+        })
+    })
   }, [])
 
   const riskColor = (risk: string) => {

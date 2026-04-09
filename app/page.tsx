@@ -1,7 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Sparkles } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 export default function Home() {
   const router = useRouter()
@@ -9,6 +10,13 @@ export default function Home() {
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // 👇 Redirect to login if not logged in
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) router.push('/auth')
+    })
+  }, [])
 
   const handleSubmit = async () => {
     if (!title || !description) {
